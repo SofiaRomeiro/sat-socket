@@ -140,7 +140,7 @@ void link_socket() {
             exit(1);
         }
 
-		printf("Received from RDP2: %s\n", buffer_rdp2);'''
+		printf("Received from RDP2: %s\n", buffer_rdp2);
 
 		// Forward to RDP1
         sendto(server_socket_rdp1, buffer_rdp2, 13, 0, (struct sockaddr*)&client_addr_rdp1, client_addr_rdp1_len);
