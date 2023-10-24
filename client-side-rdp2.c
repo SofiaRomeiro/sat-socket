@@ -17,8 +17,6 @@ int main() {
     struct sockaddr_in server_addr;
     time_t t_send;
     time_t t_recv;
-
-    srand(time(NULL));
     
 //  --------------------------------- Create UDP socket -------------------------------------------------
     client_socket = socket(AF_INET, SOCK_DGRAM, 0);
