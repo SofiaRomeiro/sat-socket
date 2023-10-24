@@ -15,7 +15,7 @@
 #define ADD 1
 #define DEL 0
 
-float delay = 0;
+float delay = 1000;
 
 // This function is responsible for, given a packet size, computing the delay (for links with speed=1200 bit/s)
 // WARNING: the packet size is given in bytes so a conversion to bits is needed
@@ -124,7 +124,7 @@ void link_socket() {
 
 		// Process delay and call netemu
 
-		if (delay != 0) {
+		if (delay != 1000) {
 			run_command(delay, DEL);
 		}
 
