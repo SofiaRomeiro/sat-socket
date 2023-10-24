@@ -23,7 +23,7 @@ float link_delay_tx(int packet_size) {
 	printf("Received packet size: %d\n", packet_size);
 	float delay = (packet_size * 8.0)/LINK_SPEED;
 	printf("Generated delay: %f for packet size %d\n", delay, packet_size);
-	return delay;
+	return delay*1000; //conversion to milisseconds
 }
 
 int run_command(float delay, int action) {
