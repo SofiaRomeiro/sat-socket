@@ -123,7 +123,7 @@ void link_socket() {
 
 		// Process delay and call netemu
 
-		system("sudo qdisc del dev eth1 root");
+		system("sudo tc qdisc del dev eth1 root");
 
 		int delay = link_delay_tx(bytes_received);
 
