@@ -131,7 +131,7 @@ void link_socket() {
 
 		// Process delay and call netemu
 
-		int delay = link_delay_tx(bytes_received);
+		int delay = link_delay_tx(strlen(buffer_rdp1));
 
 		run_command(delay, ADD);
 
