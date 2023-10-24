@@ -123,8 +123,6 @@ void link_socket() {
 
 		// Process delay and call netemu
 
-		system("sudo tc qdisc del dev eth1 root");
-
 		int delay = link_delay_tx(bytes_received);
 
 		run_command(delay, ADD);
@@ -147,6 +145,7 @@ void link_socket() {
 		// Forward to RDP1
         sendto(server_socket_rdp1, buffer_rdp2, 13, 0, (struct sockaddr*)&client_addr_rdp1, client_addr_rdp1_len);
 
+		run_command(delay, DEL);
 
     }
 
