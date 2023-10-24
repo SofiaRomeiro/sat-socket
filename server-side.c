@@ -20,6 +20,7 @@ float delay = 0;
 // This function is responsible for, given a packet size, computing the delay (for links with speed=1200 bit/s)
 // WARNING: the packet size is given in bytes so a conversion to bits is needed
 float link_delay_tx(int packet_size) {
+	print("Received packet size: %i\n", packet_size);
 	float delay = (packet_size * 8)/LINK_SPEED;
 	printf("Generated delay: %f for packet size %f\n", delay, packet_size);
 	return delay;
