@@ -144,7 +144,7 @@ void link_socket() {
 
 		// Forward to RDP1
         //sendto(server_socket_rdp1, buffer_rdp2, 13, 0, (struct sockaddr*)&client_addr_rdp1, client_addr_rdp1_len);
-        sendto(server_socket_rdp1, "ACK", 13, 0, (struct sockaddr*)&client_addr_rdp1, client_addr_rdp1_len);
+        sendto(server_socket_rdp1, "ACK", strlen("ACK"), 0, (struct sockaddr*)&client_addr_rdp1, client_addr_rdp1_len);
 
 		run_command(delay, DEL);
 

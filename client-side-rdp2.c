@@ -33,8 +33,8 @@ int main() {
 	while(1) {
 		// Receive packet from the server
 		char buffer[MAX_PACKET_SIZE];
-		memset(buffer, 0, sizeof(buffer));
-		int bytes_received = recvfrom(client_socket, buffer, sizeof(buffer), 0, NULL, NULL);
+		memset(buffer, '\0', MAX_PACKET_SIZE);
+		int bytes_received = recvfrom(client_socket, buffer, MAX_PACKET_SIZE, 0, NULL, NULL);
 		if (bytes_received == -1) {
 			perror("Error receiving data");
 			exit(1);
@@ -43,7 +43,7 @@ int main() {
 		printf("Received from server: %s\n", buffer);
 
 		// Send data to the server
-		sendto(client_socket, "ACK", sizeof("ACK"), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
+		sendto(client_socket, "ACK", strlen("ACK"), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
 
 	}    
 
