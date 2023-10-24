@@ -133,7 +133,7 @@ void link_socket() {
         sendto(server_socket_rdp2, buffer_rdp1, strlen(buffer_rdp1), 0, (struct sockaddr*)&client_addr_rdp2, client_addr_rdp2_len);
 
 		//Wait for RDP2 answer
-		/memset(buffer_rdp2, '\0', MAX_BUFFER_SIZE);
+		memset(buffer_rdp2, '\0', MAX_BUFFER_SIZE);
         bytes_received = recvfrom(server_socket_rdp2, buffer_rdp2, sizeof(buffer_rdp2), 0, (struct sockaddr*)&client_addr_rdp2, &client_addr_rdp2_len);
         if (bytes_received == -1) {
             perror("Error receiving data");
