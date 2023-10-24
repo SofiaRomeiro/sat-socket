@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
+#include <unistd.h>
+#include <time.h>
 
 #define SERVER_IP "10.10.10.7"
 #define SERVER_PORT 12345
