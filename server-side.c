@@ -112,7 +112,7 @@ void link_socket() {
     
     while (1) {
         // Receive data from rdp1
-        memset(buffer_rdp1, 0, MAX_BUFFER_SIZE);
+        memset(buffer_rdp1, '\0', MAX_BUFFER_SIZE);
         int bytes_received = recvfrom(server_socket_rdp1, buffer_rdp1, MAX_BUFFER_SIZE, 0, (struct sockaddr*)&client_addr_rdp1, &client_addr_rdp1_len);
         if (bytes_received == -1) {
             perror("Error receiving data");
@@ -134,7 +134,7 @@ void link_socket() {
 
 		//Wait for RDP2 answer
 		memset(buffer_rdp2, '\0', MAX_BUFFER_SIZE);
-        bytes_received = recvfrom(server_socket_rdp2, buffer_rdp2, sizeof(buffer_rdp2), 0, (struct sockaddr*)&client_addr_rdp2, &client_addr_rdp2_len);
+        bytes_received = recvfrom(server_socket_rdp2, buffer_rdp2, MAX_BUFFER_SIZE, 0, (struct sockaddr*)&client_addr_rdp2, &client_addr_rdp2_len);
         if (bytes_received == -1) {
             perror("Error receiving data");
             exit(1);
