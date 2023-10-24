@@ -131,7 +131,7 @@ void link_socket() {
 
 		run_command(delay, ADD);
 
-		print("Forwarding to RDP2\n");
+		printf("Forwarding to RDP2\n");
 
         // Forward to RDP2
         sendto(server_socket_rdp2, buffer_rdp1, 13, 0, (struct sockaddr*)&client_addr_rdp2, client_addr_rdp2_len);
