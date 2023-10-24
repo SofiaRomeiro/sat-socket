@@ -20,7 +20,9 @@ float delay = 0;
 // This function is responsible for, given a packet size, computing the delay (for links with speed=1200 bit/s)
 // WARNING: the packet size is given in bytes so a conversion to bits is needed
 float link_delay_tx(int packet_size) {
-	return (packet_size * 8)/LINK_SPEED;
+	float delay = (packet_size * 8)/LINK_SPEED;
+	printf("Generated delay: %f for packet size %i\n", delay, packet_size);
+	return delay;
 }
 
 int run_command(float delay, int action) {
@@ -129,9 +131,10 @@ void link_socket() {
 
 		run_command(delay, ADD);
 
+		print("Forwarding to RDP2\n");
+
         // Forward to RDP2
         sendto(server_socket_rdp2, buffer_rdp1, 13, 0, (struct sockaddr*)&client_addr_rdp2, client_addr_rdp2_len);
-
 
 		// Wait for RDP2 answer
 		memset(buffer_rdp2, 0, sizeof(buffer_rdp2));
