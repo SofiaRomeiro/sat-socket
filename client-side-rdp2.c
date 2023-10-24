@@ -15,8 +15,6 @@ int main() {
 
     int client_socket;
     struct sockaddr_in server_addr;
-    time_t t_send;
-    time_t t_recv;
     
 //  --------------------------------- Create UDP socket -------------------------------------------------
     client_socket = socket(AF_INET, SOCK_DGRAM, 0);
@@ -37,7 +35,6 @@ int main() {
 		char buffer[MAX_PACKET_SIZE];
 		memset(buffer, 0, sizeof(buffer));
 		int bytes_received = recvfrom(client_socket, buffer, sizeof(buffer), 0, NULL, NULL);
-		time(&t_recv);
 		if (bytes_received == -1) {
 			perror("Error receiving data");
 			exit(1);
