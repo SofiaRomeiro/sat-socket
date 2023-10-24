@@ -127,12 +127,12 @@ void link_socket() {
 
 		run_command(delay, ADD);
 
-		printf("Forwarding to RDP2\n");
+		'''printf("Forwarding to RDP2\n");
 
-        // Forward to RDP2
+        Forward to RDP2
         sendto(server_socket_rdp2, buffer_rdp1, 13, 0, (struct sockaddr*)&client_addr_rdp2, client_addr_rdp2_len);
 
-		// Wait for RDP2 answer
+		Wait for RDP2 answer
 		memset(buffer_rdp2, 0, sizeof(buffer_rdp2));
         bytes_received = recvfrom(server_socket_rdp2, buffer_rdp2, sizeof(buffer_rdp2), 0, (struct sockaddr*)&client_addr_rdp2, &client_addr_rdp2_len);
         if (bytes_received == -1) {
@@ -140,10 +140,11 @@ void link_socket() {
             exit(1);
         }
 
-		printf("Received from RDP2: %s\n", buffer_rdp2);
+		printf("Received from RDP2: %s\n", buffer_rdp2);'''
 
 		// Forward to RDP1
-        sendto(server_socket_rdp1, buffer_rdp2, 13, 0, (struct sockaddr*)&client_addr_rdp1, client_addr_rdp1_len);
+        //sendto(server_socket_rdp1, buffer_rdp2, 13, 0, (struct sockaddr*)&client_addr_rdp1, client_addr_rdp1_len);
+        sendto(server_socket_rdp1, "ACK", 13, 0, (struct sockaddr*)&client_addr_rdp1, client_addr_rdp1_len);
 
 		run_command(delay, DEL);
 
