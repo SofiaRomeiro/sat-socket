@@ -32,10 +32,10 @@ int run_command(float delay, int action) {
 
 	char* command = "";
 	if (action) {
-		printf("tc qdisc add dev %s root netem delay %fms", DELAYED_INTERFACE, delay, command);
+		printf("tc qdisc add dev %s root netem delay %fms\n", DELAYED_INTERFACE, delay, command);
 	}
 	else {
-		printf("tc qdisc del dev %s root netem delay %fms", DELAYED_INTERFACE, delay, command);
+		printf("tc qdisc del dev %s root netem delay %fms\n", DELAYED_INTERFACE, delay, command);
 	}  
 
 	/* Open the command for reading. */
@@ -112,8 +112,8 @@ void link_socket() {
     
     while (1) {
         // Receive data from rdp1
-        memset(buffer_rdp1, 0, sizeof(buffer_rdp1));
-        int bytes_received = recvfrom(server_socket_rdp1, buffer_rdp1, MAX_BUFFER_SIZE, 0, (struct sockaddr*)&client_addr_rdp1, &client_addr_rdp1_len);
+        memset(buffer_rdp1, 0, MAX_BUFFER_SIZE+1);
+        int bytes_received = recvfrom(server_socket_rdp1, buffer_rdp1, MAX_BUFFER_SIZE+1, 0, (struct sockaddr*)&client_addr_rdp1, &client_addr_rdp1_len);
         if (bytes_received == -1) {
             perror("Error receiving data");
             exit(1);
