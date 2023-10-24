@@ -15,28 +15,26 @@
 #define ADD 1
 #define DEL 0
 
-float delay = 1000;
-
 // This function is responsible for, given a packet size, computing the delay (for links with speed=1200 bit/s)
 // WARNING: the packet size is given in bytes so a conversion to bits is needed
-float link_delay_tx(int packet_size) {
+int link_delay_tx(int packet_size) {
 	printf("Received packet size: %d\n", packet_size);
 	float delay = (packet_size * 8.0)/LINK_SPEED;
 	printf("Generated delay: %f for packet size %d\n", delay, packet_size);
-	return delay*1000; //conversion to milisseconds
+	return round(delay*1000); //conversion to milisseconds
 }
 
-int run_command(float delay, int action) {
+int run_command(int delay, int action) {
 
 	FILE *fp;
 	char path[1035];
 
 	char* command = "";
 	if (action) {
-		printf("tc qdisc add dev %s root netem delay %fms\n", DELAYED_INTERFACE, delay, command);
+		printf("tc qdisc add dev %s root netem delay %dms\n", DELAYED_INTERFACE, delay, command);
 	}
 	else {
-		printf("tc qdisc del dev %s root netem delay %fms\n", DELAYED_INTERFACE, delay, command);
+		printf("tc qdisc del dev %s root netem delay %dms\n", DELAYED_INTERFACE, delay, command);
 	}  
 
 	/* Open the command for reading. */
@@ -126,7 +124,7 @@ void link_socket() {
 
 		system("sudo qdisc del dev eth1 root");
 
-		delay = link_delay_tx(bytes_received);
+		int delay = link_delay_tx(bytes_received);
 
 		run_command(delay, ADD);
 
