@@ -43,7 +43,7 @@ int run_command(float delay, int action) {
 		exit(1);
 	}
 
-	printf("Output:\n")
+	printf("Output:\n");
   /* Read the output a line at a time - output it. */
 	while (fgets(path, sizeof(path), fp) != NULL) {
 		printf("%s", path);
@@ -85,7 +85,7 @@ void link_socket() {
     server_addr_rdp1.sin_addr.s_addr = inet_addr(SERVER_IP); 
 
 	server_addr_rdp2.sin_family = AF_INET;
-    server_addr_rdp2.sin_port = htons(SERVER_PORT);
+    server_addr_rdp2.sin_port = htons(SERVER_PORT_RDP2);
     server_addr_rdp2.sin_addr.s_addr = inet_addr(SERVER_IP); 
 
 //  --------------------------------- Bind Server Sockets -------------------------------------------------
@@ -135,7 +135,7 @@ void link_socket() {
 
 		// Wait for RDP2 answer
 		memset(buffer_rdp2, 0, sizeof(buffer_rdp2));
-        int bytes_received = recvfrom(server_socket_rdp2, buffer_rdp2, sizeof(buffer_rdp2), 0, (struct sockaddr*)&client_addr_rdp2, &client_addr_rdp2_len);
+        bytes_received = recvfrom(server_socket_rdp2, buffer_rdp2, sizeof(buffer_rdp2), 0, (struct sockaddr*)&client_addr_rdp2, &client_addr_rdp2_len);
         if (bytes_received == -1) {
             perror("Error receiving data");
             exit(1);
@@ -152,10 +152,12 @@ void link_socket() {
     // Close the socket
     close(server_socket_rdp1);
 	close(server_socket_rdp2);
-
-    return 0;
 }
 
 int main() {
+
+	link_socket();
+
+	return 0;
 
 }
