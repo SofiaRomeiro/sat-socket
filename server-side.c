@@ -10,9 +10,10 @@
 int main() {
     int server_socket;
     struct sockaddr_in server_addr;
+	socklen_t client_addr_len = sizeof(client_addr);
 
-    // Create a socket
-    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    // Create a UDP socket
+    server_socket = socket(AF_INET, SOCK_DGRAM, 0);
     if (server_socket == -1) {
         perror("Error creating server socket");
         exit(1);
