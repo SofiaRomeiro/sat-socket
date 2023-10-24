@@ -119,7 +119,15 @@ void link_socket() {
             exit(1);
         }
 
+		memset(buffer_rdp2, '\0', MAX_BUFFER_SIZE);
+        bytes_received = recvfrom(server_socket_rdp2, buffer_rdp2, MAX_BUFFER_SIZE, 0, (struct sockaddr*)&client_addr_rdp2, &client_addr_rdp2_len);
+        if (bytes_received == -1) {
+            perror("Error receiving data");
+            exit(1);
+        }
+
         printf("Received from RDP1: %s\n", buffer_rdp1);
+		printf("Received from RDP2: %s\n", buffer_rdp2);
 
 		// Process delay and call netemu
 

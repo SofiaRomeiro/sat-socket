@@ -31,6 +31,9 @@ int main() {
 // -------------------------- Generate the packet to send --------------------------
 
 	while(1) {
+
+        sendto(client_socket, "Listening from rdp2", sizeof("Listening from rdp2"), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
+
 		// Receive packet from the server
 		char buffer[MAX_PACKET_SIZE];
 		memset(buffer, '\0', MAX_PACKET_SIZE);
