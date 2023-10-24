@@ -124,9 +124,7 @@ void link_socket() {
 
 		// Process delay and call netemu
 
-		if (delay != 1000) {
-			run_command(delay, DEL);
-		}
+		system("sudo qdisc del dev eth1 root");
 
 		delay = link_delay_tx(bytes_received);
 
