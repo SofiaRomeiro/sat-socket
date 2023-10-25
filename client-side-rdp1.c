@@ -71,7 +71,7 @@ int main() {
         // Send data to the server
         sendto(client_socket, packet, strlen(packet), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
 
-        free(packet);  // Remember to free the allocated memory when done
+        free(packet);
 
         // Receive a response from the server (optional)
         char buffer[MAX_PACKET_SIZE];
@@ -85,7 +85,7 @@ int main() {
 
         printf("Received from server: %s\n", buffer);
 
-        double diff = (t_recv.tv_sec - t_send.tv_sec) + (t_recv.tv_nsec - t_send.tv_nsec) / 100000000.0;
+        double diff = ((t_recv.tv_sec - t_send.tv_sec)*1000) + ((t_recv.tv_nsec - t_send.tv_nsec) / 1000000.0);
         printf("Tx: %.5lf miliseconds\n", diff);
 
         sleep(3);

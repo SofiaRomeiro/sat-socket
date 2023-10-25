@@ -18,11 +18,17 @@
 
 // This function is responsible for, given a packet size, computing the delay (for links with speed=1200 bit/s)
 // WARNING: the packet size is given in bytes so a conversion to bits is needed
-int link_delay_tx(int packet_size) {
+unsigned int link_delay_tx(int packet_size) {
 	printf("Received packet size: %d\n", packet_size);
 	float delay = (packet_size * 8.0)/LINK_SPEED;
 	printf("Generated delay: %f for packet size %d\n", delay, packet_size);
-	return round(delay*1000); //conversion to milisseconds
+	return (unsigned int)round(delay*1000); //conversion to milisseconds
+}
+
+int emulate_delay(unsigned int delay) {
+
+    usleep(delay * 1000);  // Convert milliseconds to microseconds
+    printf("Slept for %u milliseconds.\n", delay);
 }
 
 int run_command(int delay, int action) {
@@ -131,9 +137,11 @@ void link_socket() {
 
 		// Process delay and call netemu
 
-		int delay = link_delay_tx(strlen(buffer_rdp1));
+		unsigned int delay = link_delay_tx(strlen(buffer_rdp1)); // goes in bytes
 
-		run_command(delay, ADD);
+		emulate_delay(delay);	
+	
+		//run_command(delay, ADD);
 
 		printf("Forwarding to RDP2\n");
 
@@ -150,11 +158,13 @@ void link_socket() {
 
 		printf("Received from RDP2: %s\n", buffer_rdp2);
 
+		emulate_delay(delay);
+
 		// Forward to RDP1
         sendto(server_socket_rdp1, buffer_rdp2, 13, 0, (struct sockaddr*)&client_addr_rdp1, client_addr_rdp1_len);
         //sendto(server_socket_rdp1, "ACK", strlen("ACK"), 0, (struct sockaddr*)&client_addr_rdp1, client_addr_rdp1_len);
 
-		run_command(delay, DEL);
+		//run_command(delay, DEL);
 
     }
 
