@@ -88,7 +88,7 @@ int main() {
         double diff = ((t_recv.tv_sec - t_send.tv_sec)*1000) + ((t_recv.tv_nsec - t_send.tv_nsec) / 1000000.0);
         printf("Tx: %.5lf miliseconds\n", diff);
 
-        sleep(3);
+        //sleep(3);
 
     }
 
