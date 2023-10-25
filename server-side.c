@@ -27,8 +27,11 @@ unsigned int link_delay_tx(int packet_size) {
 
 int emulate_delay(unsigned int delay) {
 
-    usleep(delay * 1000);  // Convert milliseconds to microseconds
-    printf("Slept for %u milliseconds.\n", delay);
+	struct timespec ts;
+    ts.tv_sec = delay / 1000;
+    ts.tv_nsec = (delay % 1000) * 1000000;
+    
+    nanosleep(&ts, NULL);
 }
 
 int run_command(int delay, int action) {
