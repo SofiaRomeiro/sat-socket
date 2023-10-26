@@ -4,17 +4,17 @@ Socket-based network to manipulate communication between two devices
 ## V2 Usage
 
 ### Compile and Run
-```sh
+```console
 $ make client
 $ ./client/client.exe 
 ```
 
-```sh
+```console
 $ make server
 $ ./server/server.exe 
 ```
 
 ### Clean
-```sh
+```console
 $ make clean 
 ```
