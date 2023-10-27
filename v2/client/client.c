@@ -4,6 +4,8 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/time.h>
+#include <math.h>
 
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 12345
@@ -14,12 +16,12 @@
 
 #define DELIMITER '|'
 
-#define HEADER_SIZE 8 //bytes (long int size) 
+#define HEADER_SIZE 4 //bytes (int size) 
 
-#define MIN_MESSAGE_SIZE (MIN_PACKET_SIZE - HEADER_SIZE)
-#define MAX_MESSAGE_SIZE (MAX_PACKET_SIZE - HEADER_SIZE)
+#define MIN_MESSAGE_SIZE 6
+#define MAX_MESSAGE_SIZE 252
 
-#define SIZE 100
+#define SIZE 100 //number of packets that can be in queue
 
 struct NetworkPacket {
     // header
@@ -40,6 +42,9 @@ typedef struct PacketTime Time_S;
 
 struct PacketTime* hashArrayTime[SIZE];
 
+struct timeval time_tx;
+struct timeval time_rcv;
+
 int sequencer;
 
 int hashCode(int seq) {
@@ -55,9 +60,11 @@ long int searchTime(int seq) {
         index++;
         index %= SIZE;
     }
+    printf("[ERROR] Time not found in search!\n");
+    return -1;
 }
 
-void insert(int seq, int time) {
+void insert(int seq, long int time) {
     Time_S* time_s = (Time_S*)malloc(sizeof(Time_S));
     time_s->seq = seq;
     time_s->timestamp = time;
@@ -71,26 +78,45 @@ void insert(int seq, int time) {
 
     hashArrayTime[index] = time_s;
 
+    printf("Inserted!\n");
+
 }
 
 void delete(int seq) {
+
+    printf("Seq to delete: %d\n", seq);
+
     int index = hashCode(seq);
 
-    while (hashArrayTime[index] != NULL)    {
+    printf("hash code: %d\n", index);
+
+    while (hashArrayTime[index] != NULL) {
+        printf("hash array seq: %d\n", hashArrayTime[index]->seq);   
         if (hashArrayTime[index]->seq == seq) {
             free(hashArrayTime[index]);
         }
         index++;
         index %= SIZE;
     }
+
+    printf("Deleted!!");
+
 }
 
+// returns ms
+long int timecompare(long int start, long int end) {
+    long int diff = end - start;
+    while (diff < 0) {
+        diff += 1000000;
+    }
+    return round(diff/1000);
+}
 
 int generateRandomPacketSize() {
     srand(time(NULL));
     int num = rand();
     int length = (num % MAX_MESSAGE_SIZE);
-    printf("Length: %d\n", length);
+    //printf("Length: %d\n", length);
     if (length < MIN_MESSAGE_SIZE) {
         length += MIN_MESSAGE_SIZE;
     }
@@ -101,7 +127,7 @@ int generateRandomPacketSize() {
 // Function to generate a random string of variable length
 char* generatePacketContent(int size) {    
 
-    char *random_string = (char *)malloc(size + 1);  // +1 for the null terminator
+    char *random_string = (char *)malloc(size);
     if (random_string == NULL) {
         perror("packet Content Generator: Memory allocation error");
         exit(1);
@@ -130,7 +156,7 @@ void createPacket(Packet* packet_S){
 
 	packet_S->message = (char *)malloc((strlen(message) + 1) * sizeof(char));
     if (packet_S->message == NULL) {
-        perror("CreatePacket: Memory allocation error");
+        perror("CreatePacket: Memory allocation error\n");
         exit(1);
     }
 
@@ -151,7 +177,7 @@ int main() {
 //  --------------------------------- Create UDP socket -------------------------------------------------
     client_socket = socket(AF_INET, SOCK_DGRAM, 0);
     if (client_socket == -1) {
-        perror("Error creating client socket");
+        perror("Error creating client socket\n");
         exit(1);
     }
 
@@ -174,34 +200,49 @@ int main() {
         snprintf(frame, sizeof(long int), "%d", packet->seq);
         memcpy(frame + strlen(frame), packet->message, strlen(packet->message));
 
-        insert(packet->seq, time(NULL));
+        gettimeofday(&time_tx, NULL);
 
-        printf("Message sent to server: %s\n", frame);
+        printf("[LOG] Message sent to server\n");
 
         // Send data to the server
         sendto(client_socket, frame, strlen(frame), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
 
+        // avoid delaying due to processing
+
+        insert(packet->seq, time_tx.tv_usec);
+
+        printf("Starting frees...\n");
+
         free(packet->message);
+        printf("Free packet message OK\n");
         free(packet);
+        printf("Free packet OK\n");
         free(frame);
+        printf("Free frame OK\n");
+
 
         // Receive a response from the server (optional)
         char buffer[MAX_PACKET_SIZE];
         memset(buffer, '\0', MAX_PACKET_SIZE);
         int bytes_received = recvfrom(client_socket, buffer, MAX_PACKET_SIZE, 0, NULL, NULL);
         if (bytes_received == -1) {
-            perror("Error receiving data");
+            perror("Error receiving data\n");
             exit(1);
         }
 
-        printf("Received from server: %s\n", buffer);
+        gettimeofday(&time_rcv, NULL);
 
-                
+        char* token;
+        token = strtok(buffer, "|");
+        int seq_number = atoi(token);
 
-        //double diff = ((t_recv.tv_sec - t_send.tv_sec)*1000) + ((t_recv.tv_nsec - t_send.tv_nsec) / 1000000.0);
-        //printf("Tx: %.5lf miliseconds\n", diff);
+        printf("Seq: %d\n", seq_number);
 
-        //sleep(3);
+        long int time_tx_i = searchTime(seq_number);
+        delete(seq_number);
+
+        printf("[LOG] Received from server at %ld and sent at %ld\n", time_rcv.tv_usec , time_tx_i);
+        printf("[LOG] The RTT is %ld ms\n", timecompare(time_tx_i, time_rcv.tv_usec));
 
     }
 
