@@ -47,6 +47,10 @@ struct timeval time_rcv;
 
 int sequencer;
 
+/********************************************
+*            HASH TABLE FUNCTIONS           *
+********************************************/
+
 int hashCode(int seq) {
     return seq % SIZE;
 }
@@ -77,31 +81,67 @@ void insert(int seq, long int time) {
     }
 
     hashArrayTime[index] = time_s;
-
-    printf("Inserted!\n");
-
 }
 
 void delete(int seq) {
 
-    printf("Seq to delete: %d\n", seq);
-
     int index = hashCode(seq);
 
-    printf("hash code: %d\n", index);
-
-    while (hashArrayTime[index] != NULL) {
-        printf("hash array seq: %d\n", hashArrayTime[index]->seq);   
+    while (hashArrayTime[index] != NULL) { 
         if (hashArrayTime[index]->seq == seq) {
             free(hashArrayTime[index]);
+            hashArrayTime[index] = NULL;
+            return;
         }
         index++;
         index %= SIZE;
     }
-
-    printf("Deleted!!");
-
 }
+
+/********************************************
+*          TIMEOUT AND RTT FUNCTIONS        *
+********************************************/
+
+// Source: www.educative.io
+
+float dev_rtt;
+float est_rtt;
+float avg_rtt;
+
+/*
+This function receives:
+    - the sample_rtt, which is the value for the newly received packet
+*/
+void compute_estRTT(float sample_rtt){
+    float alpha = 0.125;
+    est_rtt = ((1 - alpha) * avg_rtt) + (alpha * sample_rtt);
+}
+
+void compute_devRTT(float sample_rtt){
+    float beta = 0.125;
+    dev_rtt = ((1 - beta) * dev_rtt) + (beta * fabs(sample_rtt - est_rtt));
+}
+
+int compute_timeout_interval(){
+    float timeout = (4 * dev_rtt) + est_rtt;
+    return timeout;
+}
+
+int handle_rtt(float rtt) {
+    if (sequencer < 1) {
+        avg_rtt = rtt;
+    }
+    float sum = (avg_rtt * (sequencer-1)) + rtt;
+    avg_rtt = sum / sequencer;
+    compute_estRTT(rtt);
+    compute_devRTT(rtt);
+    int timeout = compute_timeout_interval();
+    return timeout;
+}
+
+/********************************************
+*               TIME FUNCTIONS              *
+********************************************/
 
 // returns ms
 long int timecompare(long int start, long int end) {
@@ -112,11 +152,14 @@ long int timecompare(long int start, long int end) {
     return round(diff/1000);
 }
 
+/********************************************
+*          PACKET RELATED FUNCTIONS         *
+********************************************/
+
 int generateRandomPacketSize() {
     srand(time(NULL));
     int num = rand();
     int length = (num % MAX_MESSAGE_SIZE);
-    //printf("Length: %d\n", length);
     if (length < MIN_MESSAGE_SIZE) {
         length += MIN_MESSAGE_SIZE;
     }
@@ -164,6 +207,10 @@ void createPacket(Packet* packet_S){
 	strcpy(packet_S->message, message);
 }
 
+/********************************************
+*                   MAIN                    *
+********************************************/
+
 int main() {
 
     int client_socket;
@@ -188,15 +235,17 @@ int main() {
 
 // -------------------------- Generate the packet to send --------------------------
 
+    Packet* packet = (Packet*)malloc(sizeof(Packet));
+
     while(1) {
 
+        printf("\n***** NEW PACKET ******\n");
 
-        Packet* packet = (Packet*)malloc(sizeof(Packet));
         createPacket(packet);
 
-        int buffer_size = HEADER_SIZE + strlen(packet->message) + 1;
-        char *frame = (char *)malloc(buffer_size * sizeof(char));
-        memset(frame, '\0', buffer_size);
+        char frame[MAX_PACKET_SIZE];
+
+        memset(frame, '\0', MAX_PACKET_SIZE);
         snprintf(frame, sizeof(long int), "%d", packet->seq);
         memcpy(frame + strlen(frame), packet->message, strlen(packet->message));
 
@@ -211,15 +260,10 @@ int main() {
 
         insert(packet->seq, time_tx.tv_usec);
 
-        printf("Starting frees...\n");
-
         free(packet->message);
-        printf("Free packet message OK\n");
-        free(packet);
-        printf("Free packet OK\n");
-        free(frame);
-        printf("Free frame OK\n");
+        //printf("Free packet message OK\n");
 
+        packet->seq = -1;     
 
         // Receive a response from the server (optional)
         char buffer[MAX_PACKET_SIZE];
@@ -241,11 +285,22 @@ int main() {
         long int time_tx_i = searchTime(seq_number);
         delete(seq_number);
 
-        printf("[LOG] Received from server at %ld and sent at %ld\n", time_rcv.tv_usec , time_tx_i);
-        printf("[LOG] The RTT is %ld ms\n", timecompare(time_tx_i, time_rcv.tv_usec));
+        float tmp_rtt = timecompare(time_tx_i, time_rcv.tv_usec);
+
+        //printf("[LOG] Received from server at %ld and sent at %ld\n", time_rcv.tv_usec , time_tx_i);
+        printf("[LOG] The current RTT is %f ms\n", tmp_rtt);
+
+        float tOut = handle_rtt(tmp_rtt);
+
+        printf("[LOG] The devRTT is %f ms\n", dev_rtt);
+        printf("[LOG] The estRTT is %f ms\n", est_rtt);
+        printf("[LOG] The avgRTT is %f ms\n", avg_rtt);
+        printf("[LOG] The timeout is %f ms\n", tOut);
+
 
     }
 
+    free(packet);
     // Close the socket
     close(client_socket);
 
