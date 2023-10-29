@@ -144,10 +144,10 @@ void link_socket() {
 
         // Process delay and call netemu
 
-		unsigned int delay = link_delay_tx(strlen(buffer)); // goes in bytes
+		unsigned int packet_delay = link_delay_tx(strlen(buffer)); // goes in bytes
+        
 
-		emulate_delay(delay);
-		emulate_delay(delay);
+		emulate_delay(packet_delay);
 
         // Process the received packet
 
@@ -174,7 +174,10 @@ void link_socket() {
         char *frame = (char *)malloc(packet_size * sizeof(char));
         memset(frame, '\0', packet_size);
         snprintf(frame, sizeof(int), "%d", packet->seq);
-        memcpy(frame + strlen(frame), packet->message, strlen(packet->message));    
+        memcpy(frame + strlen(frame), packet->message, strlen(packet->message));
+
+        unsigned int ack_delay = link_delay_tx(strlen(frame)); // goes in bytes 
+        emulate_delay(ack_delay);  
 
         printf("Sent frame: %s\n", frame);    
 
